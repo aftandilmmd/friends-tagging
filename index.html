@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html class="h-screen" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends Tagging</title>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+
+    <style>
+
+        .tagger{
+            cursor: crosshair;
+        }
+
+        .tagger .tag{
+            background-color: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 3px 13px;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .tagger .tag::after {
+            position: absolute;
+            content: "";
+            border-width: 4px;
+            border-color: rgba(0, 0, 0, 0.6);
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            top: -4px;
+            left: 50%;
+            margin-left: -6px;
+            transform: rotate(45deg);
+        }
+
+        .tagger:hover > .tag{
+            opacity: 1;
+        }
+
+        .tagger input{
+            z-index: 15;
+        }
+
+        
+
+    </style>
+</head>
+<body class="h-screen bg-gray-200 flex">
+
+    <div class="relative inline-block tagger m-auto rounded overflow-hidden shadow-lg w-11/12 md:w-8/12 lg:w-1/2">
+        <img src="assets/img/friends.jpg" class="w-full" alt="">
+        <input type="text" class="px-4 py-1 rounded border border-gray-300 focus:border-gray-700 focus:outline-none w-40 -ml-20 absolute hidden shadow-lg" placeholder="Name">
+    </div>
+
+    <script>
+
+        var tagger  = document.querySelector(".tagger");
+        var image   = document.querySelector(".tagger img");
+        var input   = document.querySelector(".tagger input");
+
+        function createSquare(x,y){
+            var square = document.createElement("div");
+                square.className = "square w-12 h-12 -ml-6 -mt-6 border-2 border-black absolute z-20";
+                square.style.top  = y + "%";
+                square.style.left = x + "%";
+
+            return square;
+        }
+
+        function removeSquares(){
+            var squares = document.querySelectorAll(".tagger .square");
+                if( squares.length ) squares.forEach( square => square.remove() );
+        }
+
+        document.addEventListener('keyup', function(e){
+
+            if( e.which == 27){
+
+                input.value         = "";
+                input.style.display = "none";
+                removeSquares();
+
+            }
+
+        })
+
+        image.onclick = (e)=>{
+
+            removeSquares();
+
+            var tags = document.querySelectorAll(".tagger .tag");
+
+            var imageW  = e.target.clientWidth;
+            var imageH  = e.target.clientHeight;
+
+            var currentW = e.offsetX;
+            var currentH = e.offsetY;
+
+            var x = ( currentW / imageW ) * 100 ;
+            var y = ( currentH / imageH ) * 100 ;
+
+            var tagId = "tag-" + tags.length;
+
+            var square = createSquare(x,y);            
+
+            tagger.appendChild(square);
+
+            input.style.top  = "calc(" + y +"%" + " + 28px)";;
+            input.style.left = x +"%";
+            input.style.display = "block";
+
+            input.onkeyup = e => {
+
+                if( e.which == 13 && e.target.value.length ){
+                    
+                    var span = document.createElement("span");
+                        span.classList.add("tag");
+                        span.setAttribute("id", tagId);
+                        span.innerText = e.target.value;
+                        span.style.top = y + "%";
+                        span.style.left = x +"%";
+
+                    image.parentElement.appendChild( span );
+
+                    var tag = document.querySelector( "#" + tagId );
+                        tag.style.top = "calc(" + y +"%" + " + 8px)";
+                        tag.style.left  = "calc(" + x +"%" + " - "+ (tag.clientWidth / 2) +"px)";
+
+                    
+                    input.value = "";
+                    input.style.display = "none";
+                    removeSquares();
+
+                }
+
+            }
+
+        }
+    </script>
+    
+</body>
+</html>
